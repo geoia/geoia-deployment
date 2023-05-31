@@ -1,0 +1,63 @@
+version: "3"
+
+services:
+  postgis:
+    build:
+      context: deployments/postgis
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    ports:
+      - ${PG_PORT:-5432}:5432
+    environment:
+      POSTGRES_PASSWORD: ${PG_PASSWORD:-geoia}
+      POSTGRES_USER: ${PG_USER:-geoia}
+      POSTGRES_DB: ${PG_DATABASE:-geoia-db}
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+
+  backend:
+    build: https://github.com/geoia/backend.git
+    restart: unless-stopped
+    command: yarn run-p scripts:prepare start
+    environment:
+      PORT: 80
+      PG_HOST: postgis
+      PG_PORT: 5432
+      PG_PASSWORD: ${PG_PASSWORD:-geoia}
+      PG_USER: ${PG_USER:-geoia}
+      PG_DATABASE: ${PG_DATABASE:-geoia-db}
+    volumes:
+      - ./shapefiles:/usr/src/app/shapefiles
+    depends_on:
+      - postgis
+    labels:
+      caddy: "http://localhost"
+      caddy.handle_path: "/api/*"
+      caddy.handle_path.0_rewrite: "* /api/v1{uri}"
+      caddy.reverse_proxy: "{{upstreams 80}}"
+
+  website:
+    build: https://github.com/geoia/website.git
+    restart: unless-stopped
+    environment:
+      PORT: 80
+       
+  caddy:
+    image: caddy:alpine
+    restart: unless-stopped
+    ports:
+      - 80:80
+      - 443:443
+    environment:
+      EMAIL: ${EMAIL:-" "}
+      DOMAIN: ${DOMAIN:-http://localhost}
+    volumes:
+      - ./Caddyfile:/etc/caddy/Caddyfile
+      - caddy_data:/data
+    depends_on:
+      - backend
+      - website
+
+volumes:
+  pgdata:
+  caddy_data:
