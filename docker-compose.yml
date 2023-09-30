@@ -16,7 +16,7 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: https://github.com/geoia/backend.git
+    build: https://github.com/geoia/backend.git${BACKEND_BRANCH:+#${BACKEND_BRANCH}}
     restart: unless-stopped
     command: yarn run-p scripts:prepare start
     environment:
@@ -37,17 +37,17 @@ services:
       caddy.reverse_proxy: "{{upstreams 80}}"
 
   website:
-    build: https://github.com/geoia/website.git
+    build: github.com/geoia/website.git${WEBSITE_BRANCH:+#${WEBSITE_BRANCH}}
     restart: unless-stopped
     environment:
       PORT: 80
-       
+
   caddy:
     image: caddy:alpine
     restart: unless-stopped
     ports:
-      - 80:80
-      - 443:443
+      - 8080:80
+      - 8443:443
     environment:
       EMAIL: ${EMAIL:-" "}
       DOMAIN: ${DOMAIN:-http://localhost}
