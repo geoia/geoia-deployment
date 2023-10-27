@@ -16,7 +16,9 @@ services:
       - pgdata:/var/lib/postgresql/data
 
   backend:
-    build: https://github.com/geoia/backend.git
+    build:
+      context: projects/backend
+      dockerfile: Dockerfile
     restart: unless-stopped
     command: yarn run-p scripts:prepare start
     environment:
@@ -37,7 +39,9 @@ services:
       caddy.reverse_proxy: "{{upstreams 80}}"
 
   website:
-    build: https://github.com/geoia/website.git
+    build:
+      context: projects/website
+      dockerfile: Dockerfile
     restart: unless-stopped
     environment:
       PORT: 80
