@@ -9,8 +9,17 @@
 {$DOMAIN} {
     reverse_proxy website:80
 
-    handle_path /api* {
+    handle_path /api/docs {
+        redir * /api/docs/ 301
+    }
+
+    handle_path /api/docs* {
+        rewrite * /docs{uri}
         reverse_proxy http://backend:80   
-        rewrite * /api/v1{uri}
+    }
+
+    handle_path /api/* {
+        rewrite * /api{uri}
+        reverse_proxy http://backend:80   
     }
 }
