@@ -1,6 +1,6 @@
 [submodule "projects/website"]
 	path = projects/website
-	url = git@github.com:geoia/website.git
+	url = https://github.com/geoia/website.git
 [submodule "projects/backend"]
 	path = projects/backend
-	url = git@github.com:geoia/backend.git
+	url = https://github.com/geoia/backend.git
